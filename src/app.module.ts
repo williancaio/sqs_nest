@@ -5,12 +5,15 @@ import { InputController } from './input/input.controller';
 import { InputService } from './input/input.service';
 import { SQS } from 'aws-sdk';
 import { SqsModule } from './sqs-module/sqs-module.module';
+import { ConsumeService } from './consume/consume.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [],
+  imports: [ScheduleModule.forRoot()],
   controllers: [AppController, InputController],
-  providers: [AppService, InputService, SqsModule],
+  providers: [AppService, InputService, SqsModule, ConsumeService],
 })
+
 export class AppModule {}
 
 @Module({

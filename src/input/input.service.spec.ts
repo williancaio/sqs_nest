@@ -1,44 +1,48 @@
-import { Test } from '@nestjs/testing';
-import { InputService, SQS } from './input.service';
-
-
+// input.service.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { InputService } from './input.service';
+import { SqsModule } from '../sqs-module/sqs-module.module';
 
 describe('InputService', () => {
-  let service: InputService;
-  let sqs: SQS;
+  let inputService: InputService;
+  let sqsModule: SqsModule;
 
   beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
+    const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [
         InputService,
         {
-          provide: SQS,
-          useFactory: () => ({
-            sendMessage: jest.fn().mockReturnValue({
+          provide: SqsModule,
+          useValue: {
+            sqs: {
+              sendMessage: jest.fn().mockReturnThis(),
               promise: jest.fn(),
-            }),
-          }),
+            },
+          },
         },
       ],
     }).compile();
 
-    service = moduleRef.get<InputService>(InputService);
-    
+    inputService = moduleRef.get<InputService>(InputService);
+    sqsModule = moduleRef.get<SqsModule>(SqsModule);
   });
 
   describe('sendToQueue', () => {
-    it('should send data to queue', async () => {
+    it('should send input data to the queue', async () => {
       const inputData = {
         input_id: 1,
-        name: 'John Doe',
-        address: '123 Main Street',
+        name: 'John',
+        address: '123 Main St',
       };
 
-      await service.sendToQueue(inputData);
-      const mockSqs = SQS;
-      const sendMessageParams = mockSqs.mock.calls[0][0];
-      expect(sendMessageParams.QueueUrl).toEqual('https://sqs.us-east-1.amazonaws.com/123456789012/my-queue');
-      expect(sendMessageParams.MessageBody).toEqual(JSON.stringify(inputData));
+      const expectedParams = {
+        QueueUrl: process.env.QueueUrl,
+        MessageBody: JSON.stringify(inputData),
+      };
+
+      await inputService.sendToQueue(inputData);
+
+      expect(sqsModule.sqs.sendMessage).toHaveBeenCalledWith(expectedParams);
     });
   });
 });

@@ -19,7 +19,7 @@ export class InputService {
   async sendToQueue(data: InputData): Promise<void> {
     console.log(process.env.QUEUE_URL)
     const params: SendMessageRequest = {
-      QueueUrl: process.env.QUEUE_URL,
+      QueueUrl: process.env.QueueUrl,
       MessageBody: JSON.stringify(data),
     };
 
