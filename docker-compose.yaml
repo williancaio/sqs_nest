@@ -1,0 +1,25 @@
+version: '3.1'
+
+services:
+  localstack: 
+    image: localstack/localstack:latest
+    environment:
+      - AWS_DEFAULT_REGION=us-east-1
+      - EDGE_PORT=4566
+      - services=sqs
+    ports:
+      - '4566-4583:4566-4583'
+    volumes:
+      - "${TEMPDIR:-/var/lib/localstack}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  sqs:
+    image: amazon/aws-cli
+    depends_on:
+      - localstack
+    command: sqs create-queue --queue-name recebe --endpoint-url="http://host.docker.internal:4566"
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    
