@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { InputController } from './input/input.controller';
 import { InputService } from './input/input.service';
 import { SQS } from 'aws-sdk';
@@ -10,8 +8,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [ScheduleModule.forRoot()],
-  controllers: [AppController, InputController],
-  providers: [AppService, InputService, SqsModule, ConsumeService],
+  controllers: [InputController],
+  providers: [InputService, SqsModule, ConsumeService],
 })
 
 export class AppModule {}
